@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>48 Laws of Power — Daily Law</title>
+<title>Robert Greene Library — Daily Wisdom</title>
 
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon-192.png">
@@ -13,7 +13,7 @@
 <!-- iOS "Add to Home Screen" support -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="48 Laws">
+<meta name="apple-mobile-web-app-title" content="Greene Library">
 
 <style>
   :root {
@@ -41,8 +41,8 @@
   }
   header h1 {
     margin: 0;
-    font-size: clamp(22px, 4vw, 34px);
-    letter-spacing: 3px;
+    font-size: clamp(20px, 4vw, 30px);
+    letter-spacing: 2px;
     color: var(--gold);
     text-transform: uppercase;
   }
@@ -52,14 +52,39 @@
     margin-top: 8px;
     letter-spacing: 1px;
   }
+
+  #mainNav {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  #mainNav button {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 9px 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  #mainNav button.active {
+    color: var(--gold);
+    border-color: var(--gold-dim);
+    background: var(--panel-2);
+  }
+
   main {
     max-width: 900px;
     margin: 0 auto;
     padding: 24px 16px 60px;
   }
 
-  /* Law of the day */
-  #dailyCard {
+  /* Daily card (shared style for "today" and per-book daily) */
+  .dailyCard {
     background: linear-gradient(160deg, var(--panel-2), var(--panel));
     border: 1px solid var(--gold-dim);
     border-radius: 14px;
@@ -67,36 +92,42 @@
     position: relative;
     box-shadow: 0 10px 40px rgba(0,0,0,0.5);
   }
-  #dailyCard .tag {
+  .dailyCard .tag {
     color: var(--gold);
     font-size: 12px;
     letter-spacing: 3px;
     text-transform: uppercase;
     opacity: 0.85;
   }
-  #dailyCard .lawNumber {
+  .dailyCard .bookTag {
+    color: var(--text-dim);
+    font-size: 12.5px;
+    margin-top: 10px;
+    letter-spacing: 0.5px;
+  }
+  .dailyCard .itemNumber {
     font-size: 15px;
     color: var(--text-dim);
-    margin-top: 10px;
+    margin-top: 4px;
   }
-  #dailyCard h2 {
+  .dailyCard h2 {
     font-size: clamp(20px, 3.4vw, 28px);
     color: var(--text);
     margin: 8px 0 16px;
     line-height: 1.3;
   }
-  #dailyCard .summary {
+  .dailyCard .summary {
     font-size: 16px;
     line-height: 1.65;
     color: var(--text);
   }
-  #dailyCard .footnote {
+  .dailyCard .footnote {
     margin-top: 18px;
     font-size: 12.5px;
     color: var(--text-dim);
     font-style: italic;
   }
-  #starBtn {
+  .starBtn {
     position: absolute;
     top: 22px;
     right: 22px;
@@ -106,7 +137,7 @@
     cursor: pointer;
     color: var(--text-dim);
   }
-  #starBtn.active { color: var(--gold); }
+  .starBtn.active { color: var(--gold); }
 
   #streak {
     margin-top: 14px;
@@ -116,15 +147,15 @@
     letter-spacing: 1px;
   }
 
-  /* Controls */
-  #controls {
+  /* Controls (search / favorites toggle) */
+  .controls {
     display: flex;
     gap: 10px;
     margin: 30px 0 16px;
     flex-wrap: wrap;
     align-items: center;
   }
-  #searchBox {
+  .controls input[type="text"] {
     flex: 1;
     min-width: 160px;
     background: var(--panel);
@@ -135,7 +166,7 @@
     font-family: inherit;
     font-size: 14px;
   }
-  #controls button {
+  .controls button {
     background: var(--panel);
     border: 1px solid var(--border);
     color: var(--text-dim);
@@ -145,19 +176,20 @@
     font-family: inherit;
     font-size: 13px;
     letter-spacing: 0.5px;
+    white-space: nowrap;
   }
-  #controls button.toggled {
+  .controls button.toggled {
     color: var(--gold);
     border-color: var(--gold-dim);
   }
 
-  /* Grid of all laws */
-  #grid {
+  /* Grid of items within a book */
+  .itemGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 12px;
   }
-  .lawCard {
+  .itemCard {
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -165,43 +197,108 @@
     cursor: pointer;
     transition: border-color 0.15s, background 0.15s;
   }
-  .lawCard:hover {
+  .itemCard:hover {
     border-color: var(--gold-dim);
     background: var(--panel-2);
   }
-  .lawCard.today {
-    border-color: var(--gold);
-  }
-  .lawCard .row {
+  .itemCard.today { border-color: var(--gold); }
+  .itemCard .row {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 8px;
   }
-  .lawCard .num {
+  .itemCard .num {
     color: var(--gold-dim);
     font-size: 12px;
     letter-spacing: 1px;
   }
-  .lawCard .fav {
-    color: var(--gold);
-    font-size: 13px;
-  }
-  .lawCard h3 {
+  .itemCard .fav { color: var(--gold); font-size: 13px; }
+  .itemCard h3 {
     margin: 6px 0 0;
     font-size: 15.5px;
     line-height: 1.35;
     font-weight: normal;
     color: var(--text);
   }
-  .lawCard .expand {
+  .itemCard .expand {
     margin-top: 10px;
     font-size: 13.5px;
     line-height: 1.55;
     color: var(--text-dim);
     display: none;
   }
-  .lawCard.open .expand { display: block; }
+  .itemCard.open .expand { display: block; }
+
+  /* Library grid of books */
+  #bookGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .bookCard {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  }
+  .bookCard:hover {
+    border-color: var(--gold-dim);
+    background: var(--panel-2);
+    transform: translateY(-2px);
+  }
+  .bookCard .bookAuthor {
+    color: var(--gold-dim);
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .bookCard h2 {
+    font-size: 20px;
+    margin: 8px 0 8px;
+    color: var(--gold);
+  }
+  .bookCard p {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin: 0 0 10px;
+  }
+  .bookCard .count {
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+
+  #backToLibrary {
+    background: none;
+    border: none;
+    color: var(--gold-dim);
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 0 18px;
+    letter-spacing: 0.5px;
+  }
+  #backToLibrary:hover { color: var(--gold); }
+
+  #bookHeader {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  #bookHeader .bookAuthor {
+    color: var(--gold-dim);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  #bookHeader h2 {
+    color: var(--gold);
+    font-size: 24px;
+    margin: 6px 0 0;
+  }
 
   footer {
     text-align: center;
@@ -210,116 +307,252 @@
     padding: 30px 16px;
     opacity: 0.7;
   }
+
+  [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>48 Laws of Power</h1>
-  <p>One law a day, drawn from Robert Greene's classic — original summaries, not book excerpts</p>
+  <h1>Robert Greene Library</h1>
+  <p>Daily wisdom from four classic strategy books — original summaries, not book excerpts</p>
+  <nav id="mainNav">
+    <button data-view="today" class="active">Today</button>
+    <button data-view="library">Library</button>
+  </nav>
 </header>
 
 <main>
-  <section id="dailyCard">
-    <button id="starBtn" title="Save to favorites">☆</button>
-    <div class="tag">Law of the Day</div>
-    <div class="lawNumber" id="dailyNumber">Law 1</div>
-    <h2 id="dailyTitle"></h2>
-    <div class="summary" id="dailySummary"></div>
-    <div class="footnote">A new law surfaces automatically every day. Read the original book for Greene's full historical case studies and reasoning.</div>
+
+  <!-- TODAY (combined feed across all books) -->
+  <section id="view-today">
+    <div class="dailyCard" id="todayCard">
+      <button class="starBtn" id="todayStarBtn" title="Save to favorites">☆</button>
+      <div class="tag">Today's Entry</div>
+      <div class="bookTag" id="todayBookTag"></div>
+      <div class="itemNumber" id="todayItemNumber"></div>
+      <h2 id="todayTitle"></h2>
+      <div class="summary" id="todaySummary"></div>
+      <div class="footnote">One entry surfaces automatically every day, drawn from all four books. Read the originals for Greene's full case studies and reasoning.</div>
+    </div>
+    <div id="streak"></div>
   </section>
 
-  <div id="streak"></div>
+  <!-- LIBRARY (pick a book) -->
+  <section id="view-library" hidden>
+    <div id="bookGrid"></div>
+  </section>
 
-  <div id="controls">
-    <input type="text" id="searchBox" placeholder="Search all 48 laws...">
-    <button id="favToggle">★ Favorites only</button>
-  </div>
+  <!-- BOOK (single book, scoped daily + browsable list) -->
+  <section id="view-book" hidden>
+    <button id="backToLibrary">← Back to Library</button>
+    <div id="bookHeader">
+      <div class="bookAuthor" id="bookHeaderAuthor"></div>
+      <h2 id="bookHeaderTitle"></h2>
+    </div>
 
-  <div id="grid"></div>
+    <div class="dailyCard" id="bookDailyCard">
+      <button class="starBtn" id="bookStarBtn" title="Save to favorites">☆</button>
+      <div class="tag" id="bookDailyTag">Today's Entry</div>
+      <div class="itemNumber" id="bookItemNumber"></div>
+      <h2 id="bookDailyTitle"></h2>
+      <div class="summary" id="bookDailySummary"></div>
+    </div>
+
+    <div class="controls">
+      <input type="text" id="bookSearchBox" placeholder="Search this book...">
+      <button id="bookFavToggle">★ Favorites only</button>
+    </div>
+
+    <div class="itemGrid" id="bookGridItems"></div>
+  </section>
+
 </main>
 
 <footer>
-  Built as a personal reference tool. Summaries are original paraphrases inspired by publicly known law titles — for authoritative detail, read <em>The 48 Laws of Power</em> by Robert Greene.
+  Built as a personal reference tool. Summaries are original paraphrases inspired by publicly known chapter/law titles — for authoritative detail, read the original books by Robert Greene.
 </footer>
 
 <script>
 (function () {
   "use strict";
 
-  const LAWS = [
-    { n: 1, title: "Never Outshine the Master", summary: "When working under someone more powerful, let them feel secure in their superiority. Making a boss or mentor look outclassed breeds insecurity and resentment, not gratitude." },
-    { n: 2, title: "Never Put Too Much Trust in Friends, Learn How to Use Enemies", summary: "Friends can grow envious and turn on you more easily than you'd expect, while a former enemy, once won over, often proves fiercely loyal to prove their change of heart." },
-    { n: 3, title: "Conceal Your Intentions", summary: "People act to protect themselves when they see your goals coming. Keep your real aims hidden behind a plausible cover story so others can't organize against you." },
-    { n: 4, title: "Always Say Less Than Necessary", summary: "The more you talk, the more ordinary and exposed you seem, and the more likely you are to say something you regret. Ambiguity and brevity project control." },
-    { n: 5, title: "So Much Depends on Reputation — Guard It with Your Life", summary: "Reputation is a form of leverage that precedes you into every room. Protect it deliberately, and use it to intimidate rather than always having to act." },
-    { n: 6, title: "Court Attention at All Cost", summary: "Visibility is power; being overlooked is a kind of death in any competitive arena. Stand out through boldness, contrast, or spectacle rather than blending in." },
-    { n: 7, title: "Get Others to Do the Work for You, But Always Take the Credit", summary: "Use the skill, effort, and knowledge of others to accomplish your goals efficiently, then make sure your name is the one attached to the result." },
-    { n: 8, title: "Make Other People Come to You — Use Bait if Necessary", summary: "Whoever is forced to react is at a disadvantage. Create a situation compelling enough that others approach you on your terms, rather than you chasing them." },
-    { n: 9, title: "Win Through Your Actions, Never Through Argument", summary: "Winning a verbal argument rarely changes minds and often breeds quiet resentment. A demonstrated result is far more persuasive than the cleverest rhetoric." },
-    { n: 10, title: "Infection: Avoid the Unhappy and Unlucky", summary: "Chronic negativity, misfortune, and bad judgment tend to spread to those nearby. Evaluate the people you associate with as carefully as you'd evaluate a decision." },
-    { n: 11, title: "Learn to Keep People Dependent on You", summary: "If your value is irreplaceable and specific to you, others cannot easily discard you. Independence in others is safety for them and risk for you." },
-    { n: 12, title: "Use Selective Honesty and Generosity to Disarm Your Victim", summary: "One sincere, disarming act of openness or generosity can lower a person's guard completely, making them far less likely to suspect a broader agenda." },
-    { n: 13, title: "When Asking for Help, Appeal to People's Self-Interest, Never to Their Mercy or Gratitude", summary: "People are moved to act by what benefits them, not by sympathy alone. Frame requests around what the other person stands to gain." },
-    { n: 14, title: "Pose as a Friend, Work as a Spy", summary: "Genuine-seeming friendliness is one of the most effective ways to gather information. People reveal far more to someone they believe is on their side." },
-    { n: 15, title: "Crush Your Enemy Totally", summary: "A rival left partially defeated has time and motive to recover and retaliate. A half-hearted resolution to conflict often costs more in the long run." },
-    { n: 16, title: "Use Absence to Increase Respect and Honor", summary: "Constant presence lowers perceived value through overexposure. Strategic absence renews scarcity and reminds people why they wanted you around." },
-    { n: 17, title: "Keep Others in Suspended Terror: Cultivate an Air of Unpredictability", summary: "Total predictability makes you easy to plan against. An element of surprise or unreadability keeps others cautious and off-balance around you." },
-    { n: 18, title: "Do Not Build Fortresses to Protect Yourself — Isolation Is Dangerous", summary: "Cutting yourself off from others for safety actually removes your access to information and allies, leaving you exposed rather than protected." },
-    { n: 19, title: "Know Who You're Dealing with — Do Not Offend the Wrong Person", summary: "Not everyone responds to the same tactics, and some people are far more dangerous to cross than they appear. Read people accurately before you act." },
-    { n: 20, title: "Do Not Commit to Anyone", summary: "Staying independent of any single faction preserves your options and your leverage. Once you're firmly aligned, others no longer need to court your favor." },
-    { n: 21, title: "Play a Sucker to Catch a Sucker — Seem Dumber Than Your Mark", summary: "Letting others feel intellectually superior to you makes them underestimate you, which is exactly the position from which to outmaneuver them." },
-    { n: 22, title: "Use the Surrender Tactic: Transform Weakness into Power", summary: "When you're clearly overmatched, an early strategic surrender can disarm an opponent and buy you time and goodwill to recover, rather than a costly losing fight." },
-    { n: 23, title: "Concentrate Your Forces", summary: "Spreading your energy, resources, or attention thin across many fronts weakens all of them. Depth in one focused area beats shallow effort across many." },
-    { n: 24, title: "Play the Perfect Courtier", summary: "In any hierarchy, subtle skills — tact, charm, reading the room, flattering without groveling — matter as much as competence for navigating politics gracefully." },
-    { n: 25, title: "Re-Create Yourself", summary: "You aren't bound by the identity others assigned you or the one you started with. Deliberately shaping your own public image gives you control over how you're perceived." },
-    { n: 26, title: "Keep Your Hands Clean", summary: "Let others carry out the unpleasant or risky tasks that could damage your reputation, while you stay associated only with the favorable outcomes." },
-    { n: 27, title: "Play on People's Need to Believe to Create a Cult-Like Following", summary: "People want something to believe in. Offering a clear vision, a sense of belonging, and an air of mystery inspires a devotion that pure logic never will." },
-    { n: 28, title: "Enter Action with Boldness", summary: "Hesitation broadcasts doubt and invites others to test you. A bold, confident entrance is often met with less resistance than a timid, apologetic one." },
-    { n: 29, title: "Plan All the Way to the End", summary: "Failing to think through the consequences of success itself is a common trap. Consider the endgame and its aftermath before you commit to a course of action." },
-    { n: 30, title: "Make Your Accomplishments Seem Effortless", summary: "Visible struggle invites scrutiny and imitation. Making hard-won results look natural and easy makes your abilities seem more formidable, not less." },
-    { n: 31, title: "Control the Options: Get Others to Play with the Cards You Deal", summary: "People feel free when choosing between options, even if you're the one who designed every option on the table. Shape the choices, not just the outcome." },
-    { n: 32, title: "Play to People's Fantasies", summary: "Unpleasant truths are hard to sell. An appealing story that lets people imagine a better version of reality is often more persuasive than blunt honesty." },
-    { n: 33, title: "Discover Each Man's Thumbscrew", summary: "Everyone has an insecurity, desire, or weak spot that drives them more than they'd admit. Understanding it gives you real insight into how to influence them." },
-    { n: 34, title: "Be Royal in Your Own Fashion: Act Like a King to Be Treated Like One", summary: "How you carry yourself sets the standard for how others treat you. Low expectations for yourself invite low regard; composed confidence invites respect." },
-    { n: 35, title: "Master the Art of Timing", summary: "The same action can succeed or fail entirely based on when it's taken. Patience to wait for the right moment is itself a form of power." },
-    { n: 36, title: "Disdain Things You Cannot Have: Ignoring Them Is the Best Revenge", summary: "Fighting over something minor or unattainable gives it importance and drains your energy. Sometimes withholding attention is the strongest response available." },
-    { n: 37, title: "Create Compelling Spectacles", summary: "Striking images and memorable moments influence people more powerfully and durably than careful explanations or dry argument ever could." },
-    { n: 38, title: "Think as You Like But Behave Like Others", summary: "Openly flaunting unconventional views invites social friction. You can hold your own opinions privately while presenting a conventional face publicly." },
-    { n: 39, title: "Stir Up Waters to Catch Fish", summary: "A calm, composed person operating amid others' agitation and anger has the clearer head and the advantage — provoke instability in opponents, not in yourself." },
-    { n: 40, title: "Despise the Free Lunch", summary: "What costs you nothing is often worth what you paid for it, and comes with hidden strings. Paying full price preserves your independence and leverage." },
-    { n: 41, title: "Avoid Stepping into a Great Man's Shoes", summary: "Following a legendary predecessor invites constant unfavorable comparison. Better to establish your own distinct path than compete directly with someone else's legacy." },
-    { n: 42, title: "Strike the Shepherd and the Sheep Will Scatter", summary: "Trouble usually traces back to one influential source. Addressing the root instigator resolves group conflicts far more effectively than treating every follower." },
-    { n: 43, title: "Work on the Hearts and Minds of Others", summary: "Coercion produces only compliance, and often a desire for revenge. Genuine influence — through emotion, empathy, and self-interest — creates cooperation that actually lasts." },
-    { n: 44, title: "Disarm and Infuriate with the Mirror Effect", summary: "Reflecting someone's own behavior or values back at them can unsettle or reveal them more effectively than direct confrontation." },
-    { n: 45, title: "Preach the Need for Change, But Never Reform Too Much at Once", summary: "People are comforted by familiarity. Sweeping, abrupt change breeds anxiety and resistance; gradual, well-framed change is far easier for others to accept." },
-    { n: 46, title: "Never Appear Too Perfect", summary: "Flawless success can provoke envy rather than admiration. A visible minor flaw or humility humanizes you and makes your strengths easier for others to accept." },
-    { n: 47, title: "Do Not Go Past the Mark You Aimed for; In Victory, Learn When to Stop", summary: "Momentum from a win can tempt you to overreach and risk everything you gained. Know your original goal and stop there instead of pushing your luck." },
-    { n: 48, title: "Assume Formlessness", summary: "Rigid patterns and fixed positions are easy for others to study and exploit. Staying adaptable and hard to predict is the most durable defense there is." }
+  const BOOKS = [
+    {
+      id: "48-laws-of-power",
+      title: "The 48 Laws of Power",
+      author: "Robert Greene",
+      tagline: "Timeless tactics of influence, leverage, and self-protection.",
+      itemLabel: "Law",
+      items: [
+        { n: 1, title: "Never Outshine the Master", summary: "When working under someone more powerful, let them feel secure in their superiority. Making a boss or mentor look outclassed breeds insecurity and resentment, not gratitude." },
+        { n: 2, title: "Never Put Too Much Trust in Friends, Learn How to Use Enemies", summary: "Friends can grow envious and turn on you more easily than you'd expect, while a former enemy, once won over, often proves fiercely loyal to prove their change of heart." },
+        { n: 3, title: "Conceal Your Intentions", summary: "People act to protect themselves when they see your goals coming. Keep your real aims hidden behind a plausible cover story so others can't organize against you." },
+        { n: 4, title: "Always Say Less Than Necessary", summary: "The more you talk, the more ordinary and exposed you seem, and the more likely you are to say something you regret. Ambiguity and brevity project control." },
+        { n: 5, title: "So Much Depends on Reputation — Guard It with Your Life", summary: "Reputation is a form of leverage that precedes you into every room. Protect it deliberately, and use it to intimidate rather than always having to act." },
+        { n: 6, title: "Court Attention at All Cost", summary: "Visibility is power; being overlooked is a kind of death in any competitive arena. Stand out through boldness, contrast, or spectacle rather than blending in." },
+        { n: 7, title: "Get Others to Do the Work for You, But Always Take the Credit", summary: "Use the skill, effort, and knowledge of others to accomplish your goals efficiently, then make sure your name is the one attached to the result." },
+        { n: 8, title: "Make Other People Come to You — Use Bait if Necessary", summary: "Whoever is forced to react is at a disadvantage. Create a situation compelling enough that others approach you on your terms, rather than you chasing them." },
+        { n: 9, title: "Win Through Your Actions, Never Through Argument", summary: "Winning a verbal argument rarely changes minds and often breeds quiet resentment. A demonstrated result is far more persuasive than the cleverest rhetoric." },
+        { n: 10, title: "Infection: Avoid the Unhappy and Unlucky", summary: "Chronic negativity, misfortune, and bad judgment tend to spread to those nearby. Evaluate the people you associate with as carefully as you'd evaluate a decision." },
+        { n: 11, title: "Learn to Keep People Dependent on You", summary: "If your value is irreplaceable and specific to you, others cannot easily discard you. Independence in others is safety for them and risk for you." },
+        { n: 12, title: "Use Selective Honesty and Generosity to Disarm Your Victim", summary: "One sincere, disarming act of openness or generosity can lower a person's guard completely, making them far less likely to suspect a broader agenda." },
+        { n: 13, title: "When Asking for Help, Appeal to People's Self-Interest, Never to Their Mercy or Gratitude", summary: "People are moved to act by what benefits them, not by sympathy alone. Frame requests around what the other person stands to gain." },
+        { n: 14, title: "Pose as a Friend, Work as a Spy", summary: "Genuine-seeming friendliness is one of the most effective ways to gather information. People reveal far more to someone they believe is on their side." },
+        { n: 15, title: "Crush Your Enemy Totally", summary: "A rival left partially defeated has time and motive to recover and retaliate. A half-hearted resolution to conflict often costs more in the long run." },
+        { n: 16, title: "Use Absence to Increase Respect and Honor", summary: "Constant presence lowers perceived value through overexposure. Strategic absence renews scarcity and reminds people why they wanted you around." },
+        { n: 17, title: "Keep Others in Suspended Terror: Cultivate an Air of Unpredictability", summary: "Total predictability makes you easy to plan against. An element of surprise or unreadability keeps others cautious and off-balance around you." },
+        { n: 18, title: "Do Not Build Fortresses to Protect Yourself — Isolation Is Dangerous", summary: "Cutting yourself off from others for safety actually removes your access to information and allies, leaving you exposed rather than protected." },
+        { n: 19, title: "Know Who You're Dealing with — Do Not Offend the Wrong Person", summary: "Not everyone responds to the same tactics, and some people are far more dangerous to cross than they appear. Read people accurately before you act." },
+        { n: 20, title: "Do Not Commit to Anyone", summary: "Staying independent of any single faction preserves your options and your leverage. Once you're firmly aligned, others no longer need to court your favor." },
+        { n: 21, title: "Play a Sucker to Catch a Sucker — Seem Dumber Than Your Mark", summary: "Letting others feel intellectually superior to you makes them underestimate you, which is exactly the position from which to outmaneuver them." },
+        { n: 22, title: "Use the Surrender Tactic: Transform Weakness into Power", summary: "When you're clearly overmatched, an early strategic surrender can disarm an opponent and buy you time and goodwill to recover, rather than a costly losing fight." },
+        { n: 23, title: "Concentrate Your Forces", summary: "Spreading your energy, resources, or attention thin across many fronts weakens all of them. Depth in one focused area beats shallow effort across many." },
+        { n: 24, title: "Play the Perfect Courtier", summary: "In any hierarchy, subtle skills — tact, charm, reading the room, flattering without groveling — matter as much as competence for navigating politics gracefully." },
+        { n: 25, title: "Re-Create Yourself", summary: "You aren't bound by the identity others assigned you or the one you started with. Deliberately shaping your own public image gives you control over how you're perceived." },
+        { n: 26, title: "Keep Your Hands Clean", summary: "Let others carry out the unpleasant or risky tasks that could damage your reputation, while you stay associated only with the favorable outcomes." },
+        { n: 27, title: "Play on People's Need to Believe to Create a Cult-Like Following", summary: "People want something to believe in. Offering a clear vision, a sense of belonging, and an air of mystery inspires a devotion that pure logic never will." },
+        { n: 28, title: "Enter Action with Boldness", summary: "Hesitation broadcasts doubt and invites others to test you. A bold, confident entrance is often met with less resistance than a timid, apologetic one." },
+        { n: 29, title: "Plan All the Way to the End", summary: "Failing to think through the consequences of success itself is a common trap. Consider the endgame and its aftermath before you commit to a course of action." },
+        { n: 30, title: "Make Your Accomplishments Seem Effortless", summary: "Visible struggle invites scrutiny and imitation. Making hard-won results look natural and easy makes your abilities seem more formidable, not less." },
+        { n: 31, title: "Control the Options: Get Others to Play with the Cards You Deal", summary: "People feel free when choosing between options, even if you're the one who designed every option on the table. Shape the choices, not just the outcome." },
+        { n: 32, title: "Play to People's Fantasies", summary: "Unpleasant truths are hard to sell. An appealing story that lets people imagine a better version of reality is often more persuasive than blunt honesty." },
+        { n: 33, title: "Discover Each Man's Thumbscrew", summary: "Everyone has an insecurity, desire, or weak spot that drives them more than they'd admit. Understanding it gives you real insight into how to influence them." },
+        { n: 34, title: "Be Royal in Your Own Fashion: Act Like a King to Be Treated Like One", summary: "How you carry yourself sets the standard for how others treat you. Low expectations for yourself invite low regard; composed confidence invites respect." },
+        { n: 35, title: "Master the Art of Timing", summary: "The same action can succeed or fail entirely based on when it's taken. Patience to wait for the right moment is itself a form of power." },
+        { n: 36, title: "Disdain Things You Cannot Have: Ignoring Them Is the Best Revenge", summary: "Fighting over something minor or unattainable gives it importance and drains your energy. Sometimes withholding attention is the strongest response available." },
+        { n: 37, title: "Create Compelling Spectacles", summary: "Striking images and memorable moments influence people more powerfully and durably than careful explanations or dry argument ever could." },
+        { n: 38, title: "Think as You Like But Behave Like Others", summary: "Openly flaunting unconventional views invites social friction. You can hold your own opinions privately while presenting a conventional face publicly." },
+        { n: 39, title: "Stir Up Waters to Catch Fish", summary: "A calm, composed person operating amid others' agitation and anger has the clearer head and the advantage — provoke instability in opponents, not in yourself." },
+        { n: 40, title: "Despise the Free Lunch", summary: "What costs you nothing is often worth what you paid for it, and comes with hidden strings. Paying full price preserves your independence and leverage." },
+        { n: 41, title: "Avoid Stepping into a Great Man's Shoes", summary: "Following a legendary predecessor invites constant unfavorable comparison. Better to establish your own distinct path than compete directly with someone else's legacy." },
+        { n: 42, title: "Strike the Shepherd and the Sheep Will Scatter", summary: "Trouble usually traces back to one influential source. Addressing the root instigator resolves group conflicts far more effectively than treating every follower." },
+        { n: 43, title: "Work on the Hearts and Minds of Others", summary: "Coercion produces only compliance, and often a desire for revenge. Genuine influence — through emotion, empathy, and self-interest — creates cooperation that actually lasts." },
+        { n: 44, title: "Disarm and Infuriate with the Mirror Effect", summary: "Reflecting someone's own behavior or values back at them can unsettle or reveal them more effectively than direct confrontation." },
+        { n: 45, title: "Preach the Need for Change, But Never Reform Too Much at Once", summary: "People are comforted by familiarity. Sweeping, abrupt change breeds anxiety and resistance; gradual, well-framed change is far easier for others to accept." },
+        { n: 46, title: "Never Appear Too Perfect", summary: "Flawless success can provoke envy rather than admiration. A visible minor flaw or humility humanizes you and makes your strengths easier for others to accept." },
+        { n: 47, title: "Do Not Go Past the Mark You Aimed for; In Victory, Learn When to Stop", summary: "Momentum from a win can tempt you to overreach and risk everything you gained. Know your original goal and stop there instead of pushing your luck." },
+        { n: 48, title: "Assume Formlessness", summary: "Rigid patterns and fixed positions are easy for others to study and exploit. Staying adaptable and hard to predict is the most durable defense there is." }
+      ]
+    },
+    {
+      id: "art-of-seduction",
+      title: "The Art of Seduction",
+      author: "Robert Greene",
+      tagline: "Nine archetypes of allure, and the one profile that repels instead.",
+      itemLabel: "Type",
+      items: [
+        { n: 1, title: "The Siren", summary: "An archetype built on pure, unhurried sensory allure and comfort — drawing others in through radiant confidence and a glamorous ease rather than urgency." },
+        { n: 2, title: "The Rake", summary: "Draws people in by mirroring their desires back with reckless, flattering devotion, making the target feel like the sole object of an irresistible obsession." },
+        { n: 3, title: "The Ideal Lover", summary: "Appeals by intuiting and embodying exactly what someone is secretly longing for, becoming a living answer to a fantasy they hadn't fully named." },
+        { n: 4, title: "The Dandy", summary: "Attracts by refusing to fit expected categories, blending traits and signals in a way that fascinates precisely because it resists easy labeling." },
+        { n: 5, title: "The Natural", summary: "Seduces by seeming spontaneous, playful, and free of self-consciousness, offering a refreshing escape from everyone else's visible calculation." },
+        { n: 6, title: "The Coquette", summary: "Keeps others hooked through an alternating rhythm of warmth and withdrawal, which keeps them chasing a certainty that's always just out of reach." },
+        { n: 7, title: "The Charmer", summary: "Wins people over by reflecting their best self back at them, easing insecurities with attention and well-aimed, sincere-seeming praise." },
+        { n: 8, title: "The Charismatic", summary: "Projects an unshakable inner conviction and presence that others find magnetic, as though lit from within regardless of the room." },
+        { n: 9, title: "The Star", summary: "Cultivates a distant, almost mythic aura, letting mystery and imagination do the work that closeness and over-explanation usually undercut." },
+        { n: 10, title: "The Anti-Seducer", summary: "The book's cautionary counter-example: someone whose self-absorption, insecurity, or predictability quietly repels the very connection they're chasing." }
+      ]
+    },
+    {
+      id: "33-strategies-of-war",
+      title: "The 33 Strategies of War",
+      author: "Robert Greene",
+      tagline: "Strategic thinking distilled from history's sharpest campaigns and minds.",
+      itemLabel: "Strategy",
+      items: [
+        { n: 1, title: "Declare War on Your Enemies", summary: "Name your actual goal and commit to it fully — half-hearted ambitions dissolve under the first sign of real resistance." },
+        { n: 2, title: "Do Not Fight the Last War", summary: "Old victories teach the wrong lessons for a new fight; adapt your approach to the terrain in front of you, not the one behind you." },
+        { n: 3, title: "Amidst the Turmoil of Events, Do Not Lose Your Presence of Mind", summary: "A clear head under pressure is a decisive advantage when everyone around you is reacting on pure impulse." },
+        { n: 4, title: "Create a Sense of Urgency and Desperation", summary: "People perform at their sharpest when retreat isn't an option — remove your own easy outs before a critical effort." },
+        { n: 5, title: "Avoid the Snares of Groupthink", summary: "Consensus-seeking groups quietly punish dissent and good judgment; protect independent thinking within your own ranks." },
+        { n: 6, title: "Segment Your Forces", summary: "Smaller, semi-independent units adapt faster than one rigid mass, and are harder for an opponent to predict or paralyze all at once." },
+        { n: 7, title: "Transform Your War into a Crusade", summary: "People fight harder and longer for a cause bigger than themselves than for a narrow, purely personal goal." },
+        { n: 8, title: "Pick Your Battles Carefully", summary: "Fighting every battle that presents itself drains resources that should be reserved for the ones that actually matter." },
+        { n: 9, title: "Turn the Tables", summary: "Use an attacker's own momentum and position against them rather than absorbing their opening move head-on." },
+        { n: 10, title: "Create a Threatening Presence", summary: "A credible reputation for strength can prevent a conflict from ever needing to be fought in the first place." },
+        { n: 11, title: "Trade Space for Time", summary: "Conceding ground temporarily can buy the time needed to regroup and strike later from a stronger position." },
+        { n: 12, title: "Lose Battles but Win the War", summary: "A single loss means little if it serves a larger campaign — don't confuse a skirmish with the actual outcome." },
+        { n: 13, title: "Know Your Enemy", summary: "Understanding what truly motivates an opponent lets you anticipate their moves instead of just reacting to them." },
+        { n: 14, title: "Overwhelm Resistance with Speed and Suddenness", summary: "Fast, decisive action can defeat a stronger opponent before they've had time to organize any real response." },
+        { n: 15, title: "Control the Dynamic", summary: "Whoever sets the tempo and terms of a conflict usually wins it, regardless of who holds more raw resources." },
+        { n: 16, title: "Hit Them Where It Hurts", summary: "Target what an opponent actually depends on, not just the most visible or symbolically satisfying point of conflict." },
+        { n: 17, title: "Defeat Them in Detail", summary: "Break a larger opposing force into isolated pieces and confront each piece where it's weakest, rather than facing it all at once." },
+        { n: 18, title: "Expose and Attack Your Opponent's Soft Flank", summary: "Every strong position has an undefended angle — look for it instead of attacking where they're already prepared." },
+        { n: 19, title: "Envelop the Enemy", summary: "Surrounding an opponent's options cuts off retreat and removes their room to maneuver." },
+        { n: 20, title: "Maneuver Them Into Weakness", summary: "Provoke or guide an opponent into a position that exposes their vulnerabilities, rather than waiting for one to appear on its own." },
+        { n: 21, title: "Negotiate While Advancing", summary: "Talks and pressure aren't opposites — use the appearance of diplomacy to keep quietly gaining ground." },
+        { n: 22, title: "Know How to End Things", summary: "A conflict prolonged past its natural conclusion costs more than it gains; recognize the moment to actually stop." },
+        { n: 23, title: "Weave a Seamless Blend of Fact and Fiction", summary: "A believable mix of truth and misdirection is far more effective at shaping perception than an obvious lie." },
+        { n: 24, title: "Take the Line of Least Expectation", summary: "People defend against the moves they expect; the unexpected path is often the one left completely open." },
+        { n: 25, title: "Occupy the Moral High Ground", summary: "Being seen as the reasonable, justified party wins allies and support before a single real move is made." },
+        { n: 26, title: "Deny Them Targets", summary: "An opponent with nothing solid to strike at can't apply their strength effectively, however great it is." },
+        { n: 27, title: "Seem to Work for the Interests of Others While Furthering Your Own", summary: "Alliances built on visible mutual benefit are more durable, and more useful, than moves that look purely self-interested." },
+        { n: 28, title: "Give Your Rivals Enough Rope to Hang Themselves", summary: "Left unchecked, overconfidence and unchecked ambition often cause an opponent's downfall more effectively than direct attack." },
+        { n: 29, title: "Take Small Bites", summary: "Small, easily accepted gains attract far less resistance than one large demand made all at once." },
+        { n: 30, title: "Penetrate Their Minds", summary: "Understanding how an opponent actually thinks lets you predict and shape their decisions before they even make them." },
+        { n: 31, title: "Destroy from Within", summary: "A united front is far more vulnerable to internal doubt and division than it is to outside pressure." },
+        { n: 32, title: "Dominate While Seeming to Submit", summary: "Appearing to yield can be the most effective way to retain real control of a situation without inviting resistance." },
+        { n: 33, title: "Sow Uncertainty and Panic Through Acts of Terror", summary: "A single unpredictable, unsettling act can undo an opponent's confidence more than sustained, predictable pressure ever could." }
+      ]
+    },
+    {
+      id: "laws-of-human-nature",
+      title: "The Laws of Human Nature",
+      author: "Robert Greene",
+      tagline: "Understanding the hidden drivers behind why people really behave as they do.",
+      itemLabel: "Law",
+      items: [
+        { n: 1, title: "The Law of Irrationality", summary: "Emotion quietly drives most decisions while reason scrambles afterward to justify them; noticing your own emotional triggers is the first step to acting more rationally." },
+        { n: 2, title: "The Law of Narcissism", summary: "A basic degree of self-regard is healthy, but everyone sits somewhere on a spectrum of self-absorption; genuine empathy is a skill that has to be deliberately practiced." },
+        { n: 3, title: "The Law of Role-Playing", summary: "People constantly manage the impression they give off; learning to read the small, unguarded signals behind the performance reveals what someone actually thinks." },
+        { n: 4, title: "The Law of Compulsive Behavior", summary: "A person's true character shows up in repeated patterns of behavior over time, not in any single impressive moment or promise." },
+        { n: 5, title: "The Law of Covetousness", summary: "Desire is fueled by scarcity and distance; anything made too freely available quickly loses its perceived value." },
+        { n: 6, title: "The Law of Shortsightedness", summary: "It's natural to overweight immediate, visible concerns over long-term consequences; deliberately widening your view prevents avoidable damage later." },
+        { n: 7, title: "The Law of Defensiveness", summary: "People instinctively resist ideas that seem to attack their self-image; framing input around their own values makes it far easier for them to actually hear it." },
+        { n: 8, title: "The Law of Self-Sabotage", summary: "A persistently negative outlook can become a self-fulfilling pattern; attitude shapes outcomes more than people like to admit." },
+        { n: 9, title: "The Law of Repression", summary: "Traits and impulses a person refuses to acknowledge in themselves don't disappear — they just surface sideways, often as projection onto others." },
+        { n: 10, title: "The Law of Envy", summary: "Envy is one of the most disguised and denied emotions; recognizing it in others, and in yourself, explains a lot of otherwise-confusing hostility." },
+        { n: 11, title: "The Law of Grandiosity", summary: "Unchecked overconfidence, especially after early success, tends to distort judgment and invite an eventual, often avoidable fall." },
+        { n: 12, title: "The Law of Gender Rigidity", summary: "Rigidly performing only one narrow version of masculinity or femininity limits a person's range; the fuller spectrum of human qualities is available regardless of gender." },
+        { n: 13, title: "The Law of Aimlessness", summary: "A clear sense of direction is what turns effort into real progress; without it, activity easily substitutes for actual advancement." },
+        { n: 14, title: "The Law of Conformity", summary: "Groups exert a quiet, constant pressure toward sameness; staying aware of it is necessary to preserve independent judgment." },
+        { n: 15, title: "The Law of Fickleness", summary: "Group loyalty and goodwill are more fragile and conditional than they appear, and can shift quickly without consistent, genuine leadership." },
+        { n: 16, title: "The Law of Aggression", summary: "Aggression is often masked behind pleasant, socially acceptable behavior; learning to spot its early signs prevents being blindsided by it later." },
+        { n: 17, title: "The Law of Generational Myopia", summary: "Each generation assumes its own outlook is simply \"how things are,\" underestimating how much the moment it grew up in shaped its thinking." },
+        { n: 18, title: "The Law of Death Denial", summary: "Avoiding all thought of mortality tends to produce a more anxious, timid relationship with life; accepting it directly tends to clarify what actually matters." }
+      ]
+    }
   ];
 
-  const FAV_KEY = "laws48_favorites";
   const STREAK_KEY = "laws48_streak";
+  const OLD_FAV_KEY = "laws48_favorites"; // legacy single-book key, migrated below
 
-  function getFavorites() {
-    try { return JSON.parse(localStorage.getItem(FAV_KEY) || "[]"); }
+  function favKey(bookId) { return "favs_" + bookId; }
+
+  function migrateLegacyFavorites() {
+    const legacy = localStorage.getItem(OLD_FAV_KEY);
+    const newKey = favKey("48-laws-of-power");
+    if (legacy && !localStorage.getItem(newKey)) {
+      localStorage.setItem(newKey, legacy);
+    }
+  }
+
+  function getFavorites(bookId) {
+    try { return JSON.parse(localStorage.getItem(favKey(bookId)) || "[]"); }
     catch { return []; }
   }
-  function saveFavorites(arr) {
-    localStorage.setItem(FAV_KEY, JSON.stringify(arr));
-  }
-  function toggleFavorite(n) {
-    const favs = getFavorites();
+  function toggleFavorite(bookId, n) {
+    const favs = getFavorites(bookId);
     const idx = favs.indexOf(n);
     if (idx >= 0) favs.splice(idx, 1); else favs.push(n);
-    saveFavorites(favs);
+    localStorage.setItem(favKey(bookId), JSON.stringify(favs));
     return favs;
   }
 
-  function dayIndex() {
-    const days = Math.floor(Date.now() / 86400000);
-    return days % LAWS.length;
-  }
+  function getBook(id) { return BOOKS.find(b => b.id === id); }
+
+  function daysSinceEpoch() { return Math.floor(Date.now() / 86400000); }
 
   function updateStreak() {
     const todayStr = new Date().toDateString();
@@ -336,74 +569,174 @@
     return data.streak;
   }
 
-  function renderDaily() {
-    const idx = dayIndex();
-    const law = LAWS[idx];
-    document.getElementById("dailyNumber").textContent = "Law " + law.n + " of 48";
-    document.getElementById("dailyTitle").textContent = law.title;
-    document.getElementById("dailySummary").textContent = law.summary;
+  // Combined pool across all books, in fixed order, for the "Today" feed
+  const COMBINED = [];
+  BOOKS.forEach(book => {
+    book.items.forEach(item => {
+      COMBINED.push({ bookId: book.id, bookTitle: book.title, itemLabel: book.itemLabel, item });
+    });
+  });
 
-    const favs = getFavorites();
-    const starBtn = document.getElementById("starBtn");
-    starBtn.textContent = favs.includes(law.n) ? "★" : "☆";
-    starBtn.classList.toggle("active", favs.includes(law.n));
+  // ---------- View management ----------
+  let currentView = "today";
+  let currentBookId = null;
+
+  function showView(view) {
+    currentView = view;
+    document.getElementById("view-today").hidden = view !== "today";
+    document.getElementById("view-library").hidden = view !== "library";
+    document.getElementById("view-book").hidden = view !== "book";
+    document.querySelectorAll("#mainNav button").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.view === view || (view === "book" && btn.dataset.view === "library"));
+    });
+  }
+
+  document.querySelectorAll("#mainNav button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (btn.dataset.view === "today") renderToday();
+      if (btn.dataset.view === "library") renderLibrary();
+      showView(btn.dataset.view);
+    });
+  });
+
+  document.getElementById("backToLibrary").addEventListener("click", () => {
+    renderLibrary();
+    showView("library");
+  });
+
+  // ---------- Today (combined) ----------
+  function renderToday() {
+    const idx = daysSinceEpoch() % COMBINED.length;
+    const entry = COMBINED[idx];
+    const { bookTitle, itemLabel, item } = entry;
+
+    document.getElementById("todayBookTag").textContent = "From " + bookTitle;
+    document.getElementById("todayItemNumber").textContent = itemLabel + " " + item.n;
+    document.getElementById("todayTitle").textContent = item.title;
+    document.getElementById("todaySummary").textContent = item.summary;
+
+    const favs = getFavorites(entry.bookId);
+    const starBtn = document.getElementById("todayStarBtn");
+    const isFav = favs.includes(item.n);
+    starBtn.textContent = isFav ? "★" : "☆";
+    starBtn.classList.toggle("active", isFav);
     starBtn.onclick = () => {
-      const updated = toggleFavorite(law.n);
-      starBtn.textContent = updated.includes(law.n) ? "★" : "☆";
-      starBtn.classList.toggle("active", updated.includes(law.n));
-      renderGrid();
+      const updated = toggleFavorite(entry.bookId, item.n);
+      const nowFav = updated.includes(item.n);
+      starBtn.textContent = nowFav ? "★" : "☆";
+      starBtn.classList.toggle("active", nowFav);
     };
 
     const streak = updateStreak();
     document.getElementById("streak").textContent =
-      streak > 1 ? streak + "-day streak — keep it going" : "Day 1 of your streak — come back tomorrow for the next law";
+      streak > 1 ? streak + "-day streak — keep it going" : "Day 1 of your streak — come back tomorrow for the next entry";
   }
 
-  let favOnly = false;
-  let searchTerm = "";
+  // ---------- Library ----------
+  function renderLibrary() {
+    const grid = document.getElementById("bookGrid");
+    grid.innerHTML = "";
+    BOOKS.forEach(book => {
+      const card = document.createElement("div");
+      card.className = "bookCard";
+      card.innerHTML = `
+        <div class="bookAuthor">${book.author}</div>
+        <h2>${book.title}</h2>
+        <p>${book.tagline}</p>
+        <div class="count">${book.items.length} ${book.itemLabel.toLowerCase()}s</div>
+      `;
+      card.addEventListener("click", () => {
+        currentBookId = book.id;
+        renderBookView(book.id);
+        showView("book");
+      });
+      grid.appendChild(card);
+    });
+  }
 
-  function renderGrid() {
-    const grid = document.getElementById("grid");
-    const favs = getFavorites();
-    const todayIdx = dayIndex();
+  // ---------- Single book view ----------
+  let bookFavOnly = false;
+  let bookSearchTerm = "";
+
+  function renderBookView(bookId) {
+    const book = getBook(bookId);
+    bookFavOnly = false;
+    bookSearchTerm = "";
+    document.getElementById("bookSearchBox").value = "";
+    document.getElementById("bookFavToggle").classList.remove("toggled");
+
+    document.getElementById("bookHeaderAuthor").textContent = book.author;
+    document.getElementById("bookHeaderTitle").textContent = book.title;
+    document.getElementById("bookDailyTag").textContent = book.itemLabel + " of the Day";
+
+    const idx = daysSinceEpoch() % book.items.length;
+    const item = book.items[idx];
+    document.getElementById("bookItemNumber").textContent = book.itemLabel + " " + item.n + " of " + book.items.length;
+    document.getElementById("bookDailyTitle").textContent = item.title;
+    document.getElementById("bookDailySummary").textContent = item.summary;
+
+    const favs = getFavorites(book.id);
+    const starBtn = document.getElementById("bookStarBtn");
+    const isFav = favs.includes(item.n);
+    starBtn.textContent = isFav ? "★" : "☆";
+    starBtn.classList.toggle("active", isFav);
+    starBtn.onclick = () => {
+      const updated = toggleFavorite(book.id, item.n);
+      const nowFav = updated.includes(item.n);
+      starBtn.textContent = nowFav ? "★" : "☆";
+      starBtn.classList.toggle("active", nowFav);
+      renderBookGrid(book);
+    };
+
+    renderBookGrid(book);
+  }
+
+  function renderBookGrid(book) {
+    const grid = document.getElementById("bookGridItems");
+    const favs = getFavorites(book.id);
+    const idx = daysSinceEpoch() % book.items.length;
+    const todayN = book.items[idx].n;
     grid.innerHTML = "";
 
-    LAWS
-      .filter(law => !favOnly || favs.includes(law.n))
-      .filter(law => law.title.toLowerCase().includes(searchTerm.toLowerCase()))
-      .forEach(law => {
+    book.items
+      .filter(item => !bookFavOnly || favs.includes(item.n))
+      .filter(item => item.title.toLowerCase().includes(bookSearchTerm.toLowerCase()))
+      .forEach(item => {
         const card = document.createElement("div");
-        card.className = "lawCard" + (law.n === LAWS[todayIdx].n ? " today" : "");
+        card.className = "itemCard" + (item.n === todayN ? " today" : "");
         card.innerHTML = `
           <div class="row">
-            <span class="num">LAW ${law.n}</span>
-            <span class="fav">${favs.includes(law.n) ? "★" : ""}</span>
+            <span class="num">${book.itemLabel.toUpperCase()} ${item.n}</span>
+            <span class="fav">${favs.includes(item.n) ? "★" : ""}</span>
           </div>
-          <h3>${law.title}</h3>
-          <div class="expand">${law.summary}</div>
+          <h3>${item.title}</h3>
+          <div class="expand">${item.summary}</div>
         `;
         card.addEventListener("click", () => card.classList.toggle("open"));
         grid.appendChild(card);
       });
 
     if (!grid.children.length) {
-      grid.innerHTML = '<div style="color:var(--text-dim);grid-column:1/-1;text-align:center;padding:20px;">No laws match.</div>';
+      grid.innerHTML = '<div style="color:var(--text-dim);grid-column:1/-1;text-align:center;padding:20px;">No entries match.</div>';
     }
   }
 
-  document.getElementById("searchBox").addEventListener("input", (e) => {
-    searchTerm = e.target.value;
-    renderGrid();
+  document.getElementById("bookSearchBox").addEventListener("input", (e) => {
+    bookSearchTerm = e.target.value;
+    renderBookGrid(getBook(currentBookId));
   });
 
-  document.getElementById("favToggle").addEventListener("click", (e) => {
-    favOnly = !favOnly;
-    e.target.classList.toggle("toggled", favOnly);
-    renderGrid();
+  document.getElementById("bookFavToggle").addEventListener("click", (e) => {
+    bookFavOnly = !bookFavOnly;
+    e.target.classList.toggle("toggled", bookFavOnly);
+    renderBookGrid(getBook(currentBookId));
   });
 
-  renderDaily();
-  renderGrid();
+  // ---------- Init ----------
+  migrateLegacyFavorites();
+  renderToday();
+  renderLibrary();
+  showView("today");
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
